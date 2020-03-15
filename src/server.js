@@ -36,12 +36,23 @@ io.on('connection', socket => {
       _socketId: socket.id,
       username
     });
-    users = dedupe(users);
+    users = dedupe(users, u => u.username);
 
     // Event emit
     socket.emit('receiveUsersList', users);
     socket.broadcast.emit('receiveUsersList', users);
 
+  });
+
+  socket.on('sendChangeUsername', username => {
+    let i = users.indexOf(users.filter(obj => {
+      return obj._socketId === socket.id;
+    })[0]);
+
+    users[i].username = username
+
+    socket.emit('receiveUsersList', users);
+    socket.broadcast.emit('receiveUsersList', users);
   });
 
   socket.on('sendMessage', data => {
